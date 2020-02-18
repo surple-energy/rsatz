@@ -2,6 +2,7 @@
 
 export("%>%")
 export(add_noise)
+export(add_seasonality)
 export(pure_signal)
 export(shift_signal)
 importFrom(dplyr,mutate)
