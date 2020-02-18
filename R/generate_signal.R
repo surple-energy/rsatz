@@ -170,12 +170,46 @@ add_anomalies <- function(x, n = 0.01, strength = 1) {
   return(df)
 }
 
+#' @title add trend to a signal
+#' @description FUNCTION_DESCRIPTION
+#' @param x PARAM_DESCRIPTION
+#' @param strength PARAM_DESCRIPTION, Default: 1
+#' @param start_interval PARAM_DESCRIPTION, Default: NA
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname add_trend
+#' @export
+#' @importFrom dplyr mutate
 
+add_trend <- function(x, strength = 10, start_interval = NA) {
 
-add_trend <- function(x, trend_strength = 1) {
   intervals <- nrow(x)
 
-  mutate(x,
-         trend = (seq(from = 1, to = intervals) / intervals) * trend_strength,
-         signal = signal + trend)
+  if (is.na(start_interval)) {
+    dplyr::mutate(x,
+           trend = seq(from = 0, to = strength, length.out = intervals),
+           signal = signal + trend)
+  } else {
+    na_seq <-
+      rep(NA_integer_, start_interval)
+
+    value_seq <- seq(from = 0, to = strength, length.out= intervals - start_interval)
+
+    dplyr::mutate(x,
+           trend = append(na_seq, value_seq),
+           signal = dplyr::case_when(!is.na(trend) ~ signal + trend,
+                                     TRUE ~ signal))
+  }
+}
+
+
+add_weekends <- function(x) {
+  dplyr::mutate(x,
+         weekday = lubridate::wday(date_time,label = TRUE))
 }
