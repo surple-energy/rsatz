@@ -15,7 +15,7 @@
 #' @export
 #' @importFrom tibble tibble
 
-pure_signal <- function(days = 7 * 4, start = "2020-01-01") {
+generate_signal <- function(days = 7 * 4, start = "2020-01-01") {
   intervals <- days * 48
 
   start_date <- as.Date(start)
@@ -28,12 +28,12 @@ pure_signal <- function(days = 7 * 4, start = "2020-01-01") {
 
   df <- tibble::tibble(
     date_time = date_time,
-    pintervals = seq(
+    interval = seq(
       from = 0,
       to = (days * 2) * pi,
       length.out = intervals
     ),
-    pure = -cos(pintervals),
+    pure = -cos(interval),
     signal = pure
   )
   return(df)
@@ -134,4 +134,48 @@ add_seasonality <- function(x, seasonality_strength = 5) {
                         signal = signal + seasonality)
   }
   return(df)
+}
+
+#' @title add anomalies to a signal
+#' @description FUNCTION_DESCRIPTION
+#' @param x PARAM_DESCRIPTION
+#' @param n PARAM_DESCRIPTION, Default: 0.01
+#' @param strength PARAM_DESCRIPTION, Default: 1
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @seealso
+#'  \code{\link[dplyr]{sample}},\code{\link[dplyr]{pull}},\code{\link[dplyr]{mutate}},\code{\link[dplyr]{case_when}}
+#' @rdname add_anomalies
+#' @export
+#' @importFrom dplyr sample_frac pull mutate case_when
+
+add_anomalies <- function(x, n = 0.01, strength = 1) {
+
+  anomalies <- dplyr::sample_frac(x, n) %>%
+    dplyr::pull(date_time)
+
+  df <- dplyr::mutate(
+    x,
+    anomaly = dplyr::case_when(date_time %in% anomalies ~ strength),
+    signal = dplyr::case_when(date_time %in% anomalies ~ signal + anomaly,
+                              TRUE ~ signal)
+  )
+
+  return(df)
+}
+
+
+
+add_trend <- function(x, trend_strength = 1) {
+  intervals <- nrow(x)
+
+  mutate(x,
+         trend = (seq(from = 1, to = intervals) / intervals) * trend_strength,
+         signal = signal + trend)
 }
