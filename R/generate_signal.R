@@ -1,7 +1,7 @@
 #' @title generate a diurnal signal of half hours
 #' @description FUNCTION_DESCRIPTION
 #' @param days PARAM_DESCRIPTION, Default: 7 * 4
-#' @param start PARAM_DESCRIPTION, Default: "2020-01-01"
+#' @param start PARAM_DESCRIPTION, Default: "2020"
 #' @param amplitude PARAM_DESCRIPTION, Default: NA
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
@@ -19,12 +19,12 @@
 #' @importFrom dplyr mutate
 
 generate_signal <-
-  function(days = 7 * 4,
-           start = "2020-01-01",
+  function(days,
+           start = "2020",
            amplitude = NA) {
     intervals <- days * 48
 
-    start_date <- as.Date(start)
+    start_date <- as.Date(paste0(start, "-01-01"))
 
     end_date <- start_date + days
 
@@ -54,7 +54,7 @@ generate_signal <-
 #' @title shift a signal by a margin
 #' @description FUNCTION_DESCRIPTION
 #' @param x PARAM_DESCRIPTION
-#' @param centre_point PARAM_DESCRIPTION, Default: 10
+#' @param centre_point PARAM_DESCRIPTION
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -69,7 +69,7 @@ generate_signal <-
 #' @export
 #' @importFrom dplyr mutate
 
-shift_signal <- function(x, centre_point = 10) {
+shift_signal <- function(x, centre_point) {
   dplyr::mutate(x,
                 shift = centre_point,
                 signal = signal + shift)
@@ -241,7 +241,7 @@ make_weekends <- function(x) {
     dplyr::mutate(
       sliding_mean_signal = tsibble::slide_dbl(signal, ~ mean(., na.rm = TRUE), .size = 48),
       signal = dplyr::case_when(
-        weekday %in% c("Sat", "Sun") & !is.na(sliding_mean_signal) ~ sliding_mean_signal,
+        weekday %in% c("Sat", "Sun") & !is.na(sliding_mean_signal) & sliding_mean_signal < signal ~ sliding_mean_signal,
         TRUE ~ signal
         )
       )
