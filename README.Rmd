@@ -12,42 +12,49 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-# fakeTime
+# rsatz
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of fakeTime is to have tidyverse style functions to make fake time series data
+rsatz is a minimal library to simply make fake time series data in a tidy way
 
 ## Installation
 
-You can install the released version of fakeTime from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of rsatz from [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
-install.packages("fakeTime")
+install.packages("rsatz")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows you how to make a very simple data set:
 
 ```{r example}
-library(fakeTime)
-## basic example code
+library(rsatz)
+library(tidyverse)
+
+generate_signal(7, amplitude = 5) %>% 
+  shift_signal(10) %>% 
+  add_noise() %>% 
+  ggplot(aes(date_time, signal)) +
+  geom_line()
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
 
-```{r cars}
-summary(cars)
+Or something more complicated.
+
+```{r}
+generate_signal(7 * 4 * 12, amplitude = 5) %>% 
+  shift_signal(10) %>% 
+  make_trend(start_interval = 7 * 4 * 48, strength = 5) %>%
+  make_trend(start_interval = 7 * 4 * 48 * 2, strength = -10) %>%
+  make_weekends() %>%  
+  make_anomalies() %>% 
+  add_seasonality() %>% 
+  add_noise() %>% 
+  ggplot(aes(date_time, signal)) +
+  geom_line()
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!

@@ -127,9 +127,9 @@ add_seasonality <- function(x, seasonality_strength = 5) {
 
   annual_length <- floor(intervals / (365 * 48))
 
-  if (annual_length > 0) {
-    remainder_length <- intervals - length(seasonality_seq)
+  remainder_length <- intervals - (length(seasonality_seq) * annual_length)
 
+  if (remainder_length != 0) {
     dplyr::mutate(
       x,
       seasonality = append(rep(seasonality_seq, annual_length),
@@ -138,7 +138,7 @@ add_seasonality <- function(x, seasonality_strength = 5) {
     )
   } else {
     dplyr::mutate(x,
-                  seasonality = seasonality_seq[1:intervals],
+                  seasonality = rep(seasonality_seq, annual_length),
                   signal = signal + seasonality)
   }
 }

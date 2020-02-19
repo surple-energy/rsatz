@@ -4,12 +4,12 @@
 \alias{shift_signal}
 \title{shift a signal by a margin}
 \usage{
-shift_signal(x, centre_point = 10)
+shift_signal(x, centre_point)
 }
 \arguments{
 \item{x}{PARAM_DESCRIPTION}
 
-\item{centre_point}{PARAM_DESCRIPTION, Default: 10}
+\item{centre_point}{PARAM_DESCRIPTION}
 }
 \value{
 OUTPUT_DESCRIPTION
