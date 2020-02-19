@@ -4,10 +4,14 @@
 \alias{generate_signal}
 \title{generate a diurnal signal of half hours}
 \usage{
-generate_signal(days = 7 * 4, start = "2020-01-01")
+generate_signal(days = 7 * 4, start = "2020-01-01", amplitude = NA)
 }
 \arguments{
-\item{x}{PARAM_DESCRIPTION}
+\item{days}{PARAM_DESCRIPTION, Default: 7 * 4}
+
+\item{start}{PARAM_DESCRIPTION, Default: "2020-01-01"}
+
+\item{amplitude}{PARAM_DESCRIPTION, Default: NA}
 }
 \value{
 OUTPUT_DESCRIPTION

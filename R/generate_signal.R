@@ -1,6 +1,8 @@
 #' @title generate a diurnal signal of half hours
 #' @description FUNCTION_DESCRIPTION
-#' @param x PARAM_DESCRIPTION
+#' @param days PARAM_DESCRIPTION, Default: 7 * 4
+#' @param start PARAM_DESCRIPTION, Default: "2020-01-01"
+#' @param amplitude PARAM_DESCRIPTION, Default: NA
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -14,30 +16,40 @@
 #' @rdname pure_signal
 #' @export
 #' @importFrom tibble tibble
+#' @importFrom dplyr mutate
 
-generate_signal <- function(days = 7 * 4, start = "2020-01-01") {
-  intervals <- days * 48
+generate_signal <-
+  function(days = 7 * 4,
+           start = "2020-01-01",
+           amplitude = NA) {
+    intervals <- days * 48
 
-  start_date <- as.Date(start)
+    start_date <- as.Date(start)
 
-  end_date <- start_date + days
+    end_date <- start_date + days
 
-  date_time <- seq(as.POSIXct(start_date),
-                   as.POSIXct(end_date),
-                   by = "30 min")[1:intervals]
+    date_time <- seq(as.POSIXct(start_date),
+                     as.POSIXct(end_date),
+                     by = "30 min")[1:intervals]
 
-  df <- tibble::tibble(
-    date_time = date_time,
-    interval = seq(
-      from = 0,
-      to = (days * 2) * pi,
-      length.out = intervals
-    ),
-    pure = -cos(interval),
-    signal = pure
-  )
-  return(df)
-}
+    tibble::tibble(
+      date_time = date_time,
+      interval = seq(
+        from = 0,
+        to = (days * 2) * pi,
+        length.out = intervals
+      ),
+      pure = -cos(interval)
+    ) -> df
+
+    if(is.na(amplitude)){
+      dplyr::mutate(df,
+                    signal = pure)
+    } else {
+      dplyr::mutate(df,
+                    signal = amplitude * pure)
+    }
+  }
 
 #' @title shift a signal by a margin
 #' @description FUNCTION_DESCRIPTION
@@ -58,12 +70,9 @@ generate_signal <- function(days = 7 * 4, start = "2020-01-01") {
 #' @importFrom dplyr mutate
 
 shift_signal <- function(x, centre_point = 10) {
-
-  df <- dplyr::mutate(x,
-                      shift = 10,
-                      signal = signal + shift)
-
-  return(df)
+  dplyr::mutate(x,
+                shift = centre_point,
+                signal = signal + shift)
 }
 
 #' @title add noise to a signal
@@ -85,13 +94,10 @@ shift_signal <- function(x, centre_point = 10) {
 #' @export
 #' @importFrom dplyr mutate
 
-add_noise <- function(x, low=0, high = 1) {
-
-  df <- dplyr::mutate(x,
-                      noise = runif(nrow(x), low, high),
-                      signal = signal + noise)
-
-  return(df)
+add_noise <- function(x, low = 0, high = 1) {
+  dplyr::mutate(x,
+                noise = runif(nrow(x), low, high),
+                signal = signal + noise)
 }
 
 #' @title add seasonality to a signal
@@ -124,19 +130,20 @@ add_seasonality <- function(x, seasonality_strength = 5) {
   if (annual_length > 0) {
     remainder_length <- intervals - length(seasonality_seq)
 
-    df <- dplyr::mutate(x,
-                        seasonality = append(rep(seasonality_seq, annual_length),
-                                             seasonality_seq[1:remainder_length]),
-                        signal = signal + seasonality)
+    dplyr::mutate(
+      x,
+      seasonality = append(rep(seasonality_seq, annual_length),
+                           seasonality_seq[1:remainder_length]),
+      signal = signal + seasonality
+    )
   } else {
-    df <- dplyr::mutate(x,
-                        seasonality = seasonality_seq[1:intervals],
-                        signal = signal + seasonality)
+    dplyr::mutate(x,
+                  seasonality = seasonality_seq[1:intervals],
+                  signal = signal + seasonality)
   }
-  return(df)
 }
 
-#' @title add anomalies to a signal
+#' @title make anomaly features
 #' @description FUNCTION_DESCRIPTION
 #' @param x PARAM_DESCRIPTION
 #' @param n PARAM_DESCRIPTION, Default: 0.01
@@ -155,22 +162,20 @@ add_seasonality <- function(x, seasonality_strength = 5) {
 #' @export
 #' @importFrom dplyr sample_frac pull mutate case_when
 
-add_anomalies <- function(x, n = 0.01, strength = 1) {
+make_anomalies <- function(x, n = 0.01, strength = 1) {
 
   anomalies <- dplyr::sample_frac(x, n) %>%
     dplyr::pull(date_time)
 
-  df <- dplyr::mutate(
+  dplyr::mutate(
     x,
     anomaly = dplyr::case_when(date_time %in% anomalies ~ strength),
     signal = dplyr::case_when(date_time %in% anomalies ~ signal + anomaly,
                               TRUE ~ signal)
   )
-
-  return(df)
 }
 
-#' @title add trend to a signal
+#' @title make trend features
 #' @description FUNCTION_DESCRIPTION
 #' @param x PARAM_DESCRIPTION
 #' @param strength PARAM_DESCRIPTION, Default: 1
@@ -187,7 +192,7 @@ add_anomalies <- function(x, n = 0.01, strength = 1) {
 #' @export
 #' @importFrom dplyr mutate
 
-add_trend <- function(x, strength = 10, start_interval = NA) {
+make_trend <- function(x, strength = 10, start_interval = NA) {
 
   intervals <- nrow(x)
 
@@ -208,8 +213,36 @@ add_trend <- function(x, strength = 10, start_interval = NA) {
   }
 }
 
+#' @title make weekend features
+#' @description FUNCTION_DESCRIPTION
+#' @param x PARAM_DESCRIPTION
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @seealso
+#'  \code{\link[dplyr]{mutate}}
+#'  \code{\link[lubridate]{day}}
+#'  \code{\link[tsibble]{as_tsibble}},\code{\link[tsibble]{slide}}
+#' @rdname add_weekends
+#' @export
+#' @importFrom dplyr mutate case_when
+#' @importFrom lubridate wday
+#' @importFrom tsibble as_tsibble slide_dbl
 
-add_weekends <- function(x) {
+make_weekends <- function(x) {
   dplyr::mutate(x,
-         weekday = lubridate::wday(date_time,label = TRUE))
+                weekday = lubridate::wday(date_time, label = TRUE)) %>%
+    tsibble::as_tsibble(index = date_time) %>%
+    dplyr::mutate(
+      sliding_mean_signal = tsibble::slide_dbl(signal, ~ mean(., na.rm = TRUE), .size = 48),
+      signal = dplyr::case_when(
+        weekday %in% c("Sat", "Sun") & !is.na(sliding_mean_signal) ~ sliding_mean_signal,
+        TRUE ~ signal
+        )
+      )
 }
