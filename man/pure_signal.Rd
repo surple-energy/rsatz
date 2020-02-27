@@ -7,25 +7,26 @@
 generate_signal(days, start = "2020", amplitude = NA)
 }
 \arguments{
-\item{days}{PARAM_DESCRIPTION, Default: 7 * 4}
+\item{days}{number of days to generate signal for as an integer, Default: 7 *
+4}
 
-\item{start}{PARAM_DESCRIPTION, Default: "2020"}
+\item{start}{the year to start from as a string of `yyyy``, Default: "2020"}
 
-\item{amplitude}{PARAM_DESCRIPTION, Default: NA}
+\item{amplitude}{the height of the signal as a numeric, Default: NA}
 }
 \value{
-OUTPUT_DESCRIPTION
+a tibble
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+generate a diurnal signal of half hours over a range of days
+starting from the first of the selected year, with varying amplitude
 }
 \examples{
 \dontrun{
 if(interactive()){
- #EXAMPLE1
+ generate_signal()
+
+ generate_signal(365, start = "2019", amplitude = 12)
  }
 }
 }

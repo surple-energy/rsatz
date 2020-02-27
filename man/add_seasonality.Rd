@@ -4,26 +4,31 @@
 \alias{add_seasonality}
 \title{add seasonality to a signal}
 \usage{
-add_seasonality(x, seasonality_strength = 5)
+add_seasonality(x, strength = 5, invert = FALSE)
 }
 \arguments{
-\item{x}{PARAM_DESCRIPTION}
+\item{x}{a tibble from \code{\link{generate_signal}}}
 
-\item{seasonality_strength}{PARAM_DESCRIPTION, Default: 5}
+\item{strength}{the strength of the change in a seasonal cycle as a numeric,
+Default: 5}
+
+\item{invert}{if the signal should be higher in summer than it is in winter
+as a booleen, Default: FALSE}
 }
 \value{
-OUTPUT_DESCRIPTION
+a tibble
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+add seasonality to a signal of a specific strength, that can be
+high in summer or high in winter, that is exactly a year long
 }
 \examples{
 \dontrun{
 if(interactive()){
- #EXAMPLE1
+ generate_signal() \%>\%  add_seasonality()
  }
 }
+}
+\seealso{
+\code{\link[dplyr]{mutate}}
 }

@@ -1,14 +1,17 @@
 #' @title generate a diurnal signal of half hours
-#' @description FUNCTION_DESCRIPTION
-#' @param days PARAM_DESCRIPTION, Default: 7 * 4
-#' @param start PARAM_DESCRIPTION, Default: "2020"
-#' @param amplitude PARAM_DESCRIPTION, Default: NA
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @description generate a diurnal signal of half hours over a range of days
+#'   starting from the first of the selected year, with varying amplitude
+#' @param days number of days to generate signal for as an integer, Default: 7 *
+#'   4
+#' @param start the year to start from as a string of `yyyy``, Default: "2020"
+#' @param amplitude the height of the signal as a numeric, Default: NA
+#' @return a tibble
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  #EXAMPLE1
+#'  generate_signal()
+#'
+#'  generate_signal(365, start = "2019", amplitude = 12)
 #'  }
 #' }
 #' @seealso
@@ -52,15 +55,15 @@ generate_signal <-
   }
 
 #' @title shift a signal by a margin
-#' @description FUNCTION_DESCRIPTION
-#' @param x PARAM_DESCRIPTION
-#' @param centre_point PARAM_DESCRIPTION
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @description shift signal by a margin up or down to represent magnitude of
+#'   the value
+#' @param x a tibble from \code{\link{generate_signal}}
+#' @param centre_point the amount to shift up by as a numeric
+#' @return a tibble
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  #EXAMPLE1
+#'  generate_signal(5) %>% shift_signal(9)
 #'  }
 #' }
 #' @seealso
@@ -76,16 +79,15 @@ shift_signal <- function(x, centre_point) {
 }
 
 #' @title add noise to a signal
-#' @description FUNCTION_DESCRIPTION
-#' @param x PARAM_DESCRIPTION
-#' @param low PARAM_DESCRIPTION, Default: 0
-#' @param high PARAM_DESCRIPTION, Default: 1
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @description add noise to a signal with set minimum and maximums
+#' @param x a tibble from \code{\link{generate_signal}}
+#' @param low lowest noise to add as a numeric, Default: 0
+#' @param high highest noise to add as a numeric, Default: 1
+#' @return a tibble
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  #EXAMPLE1
+#'  generate_signal() %>% add_noise()
 #'  }
 #' }
 #' @seealso
@@ -101,27 +103,40 @@ add_noise <- function(x, low = 0, high = 1) {
 }
 
 #' @title add seasonality to a signal
-#' @description FUNCTION_DESCRIPTION
-#' @param x PARAM_DESCRIPTION
-#' @param seasonality_strength PARAM_DESCRIPTION, Default: 5
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @description add seasonality to a signal of a specific strength, that can be
+#'   high in summer or high in winter, that is exactly a year long
+#' @param x a tibble from \code{\link{generate_signal}}
+#' @param strength the strength of the change in a seasonal cycle as a numeric,
+#'   Default: 5
+#' @param invert if the signal should be higher in summer than it is in winter
+#'   as a booleen, Default: FALSE
+#' @return a tibble
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  #EXAMPLE1
+#'  generate_signal() %>%  add_seasonality()
 #'  }
 #' }
+#' @seealso
+#'  \code{\link[dplyr]{mutate}}
 #' @rdname add_seasonality
 #' @export
 #' @importFrom dplyr mutate
 
-add_seasonality <- function(x, seasonality_strength = 5) {
-  seasonality_seq <- cos(seq(
-    from = 0,
-    to = pi * 2,
-    length.out = 365 * 48
-  )) * seasonality_strength
+add_seasonality <- function(x, strength = 5, invert = FALSE) {
+  if(invert) {
+    seasonality_seq <- -cos(seq(
+      from = 0,
+      to = pi * 2,
+      length.out = 365 * 48
+    )) * strength
+  } else{
+    seasonality_seq <- cos(seq(
+      from = 0,
+      to = pi * 2,
+      length.out = 365 * 48
+    )) * strength
+  }
 
   intervals <- nrow(x)
 
@@ -144,21 +159,23 @@ add_seasonality <- function(x, seasonality_strength = 5) {
 }
 
 #' @title make anomaly features
-#' @description FUNCTION_DESCRIPTION
-#' @param x PARAM_DESCRIPTION
-#' @param n PARAM_DESCRIPTION, Default: 0.01
-#' @param strength PARAM_DESCRIPTION, Default: 1
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @description make anomaly features of varying number that randomly increase
+#'   the signal by a specific volume
+#' @param x a tibble from \code{\link{generate_signal}}
+#' @param n the percentage of the data to insert anomalies into as a numeric <=
+#'   1, Default: 0.01
+#' @param strength the strength of the anomalies in the signal as a numeric,
+#'   Default: 1
+#' @return a tibble
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  #EXAMPLE1
+#'  generate_signal() %>% make_anomalies()
 #'  }
 #' }
 #' @seealso
 #'  \code{\link[dplyr]{sample}},\code{\link[dplyr]{pull}},\code{\link[dplyr]{mutate}},\code{\link[dplyr]{case_when}}
-#' @rdname add_anomalies
+#' @rdname make_anomalies
 #' @export
 #' @importFrom dplyr sample_frac pull mutate case_when
 
@@ -176,35 +193,36 @@ make_anomalies <- function(x, n = 0.01, strength = 1) {
 }
 
 #' @title make trend features
-#' @description FUNCTION_DESCRIPTION
-#' @param x PARAM_DESCRIPTION
-#' @param strength PARAM_DESCRIPTION, Default: 1
-#' @param start_interval PARAM_DESCRIPTION, Default: NA
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @description make trend features that start at a specific interval that
+#'   increase or decrease the signal linearly by a specific strength
+#' @param x a tibble from \code{\link{generate_signal}}
+#' @param strength the strength of the trend in the signal as a numeric,
+#'   Default: 1
+#' @param start interval to start on as an integer, Default: NA
+#' @return a tibble
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  #EXAMPLE1
+#'  generate_signal() %>% make_trend()
 #'  }
 #' }
-#' @rdname add_trend
+#' @rdname make_trend
 #' @export
-#' @importFrom dplyr mutate
+#' @importFrom dplyr mutate case_when
 
-make_trend <- function(x, strength = 10, start_interval = NA) {
+make_trend <- function(x, strength = 10, start = NA) {
 
   intervals <- nrow(x)
 
-  if (is.na(start_interval)) {
+  if (is.na(start)) {
     dplyr::mutate(x,
            trend = seq(from = 0, to = strength, length.out = intervals),
            signal = signal + trend)
   } else {
     na_seq <-
-      rep(NA_integer_, start_interval)
+      rep(NA_integer_, start)
 
-    value_seq <- seq(from = 0, to = strength, length.out= intervals - start_interval)
+    value_seq <- seq(from = 0, to = strength, length.out= intervals - start)
 
     dplyr::mutate(x,
            trend = append(na_seq, value_seq),
@@ -214,21 +232,19 @@ make_trend <- function(x, strength = 10, start_interval = NA) {
 }
 
 #' @title make weekend features
-#' @description FUNCTION_DESCRIPTION
-#' @param x PARAM_DESCRIPTION
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @description make weekend features for saturdays and sundays that are capped
+#'   in value to the local average
+#' @param x a tibble from \code{\link{generate_signal}}
+#' @return a tssibble
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  #EXAMPLE1
+#'  generate_signal() %>% make_weekends()
 #'  }
 #' }
-#' @seealso
-#'  \code{\link[dplyr]{mutate}}
-#'  \code{\link[lubridate]{day}}
-#'  \code{\link[tsibble]{as_tsibble}},\code{\link[tsibble]{slide}}
-#' @rdname add_weekends
+#' @seealso \code{\link[dplyr]{mutate}} \code{\link[lubridate]{day}}
+#' \code{\link[tsibble]{as_tsibble}},\code{\link[tsibble]{slide}}
+#' @rdname make_weekends
 #' @export
 #' @importFrom dplyr mutate case_when
 #' @importFrom lubridate wday
@@ -241,8 +257,10 @@ make_weekends <- function(x) {
     dplyr::mutate(
       sliding_mean_signal = tsibble::slide_dbl(signal, ~ mean(., na.rm = TRUE), .size = 48),
       signal = dplyr::case_when(
-        weekday %in% c("Sat", "Sun") & !is.na(sliding_mean_signal) & sliding_mean_signal < signal ~ sliding_mean_signal,
+        weekday %in% c("Sat", "Sun") &
+          !is.na(sliding_mean_signal) &
+          sliding_mean_signal < signal ~ sliding_mean_signal,
         TRUE ~ signal
-        )
       )
+    )
 }

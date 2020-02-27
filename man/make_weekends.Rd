@@ -7,26 +7,23 @@
 make_weekends(x)
 }
 \arguments{
-\item{x}{PARAM_DESCRIPTION}
+\item{x}{a tibble from \code{\link{generate_signal}}}
 }
 \value{
-OUTPUT_DESCRIPTION
+a tssibble
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+make weekend features for saturdays and sundays that are capped
+in value to the local average
 }
 \examples{
 \dontrun{
 if(interactive()){
- #EXAMPLE1
+ generate_signal() \%>\% make_weekends()
  }
 }
 }
 \seealso{
-\code{\link[dplyr]{mutate}}
-\code{\link[lubridate]{day}}
+\code{\link[dplyr]{mutate}} \code{\link[lubridate]{day}}
 \code{\link[tsibble]{as_tsibble}},\code{\link[tsibble]{slide}}
 }

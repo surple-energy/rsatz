@@ -7,25 +7,22 @@
 add_noise(x, low = 0, high = 1)
 }
 \arguments{
-\item{x}{PARAM_DESCRIPTION}
+\item{x}{a tibble from \code{\link{generate_signal}}}
 
-\item{low}{PARAM_DESCRIPTION, Default: 0}
+\item{low}{lowest noise to add as a numeric, Default: 0}
 
-\item{high}{PARAM_DESCRIPTION, Default: 1}
+\item{high}{highest noise to add as a numeric, Default: 1}
 }
 \value{
-OUTPUT_DESCRIPTION
+a tibble
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+add noise to a signal with set minimum and maximums
 }
 \examples{
 \dontrun{
 if(interactive()){
- #EXAMPLE1
+ generate_signal() \%>\% add_noise()
  }
 }
 }

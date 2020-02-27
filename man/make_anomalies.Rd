@@ -7,25 +7,25 @@
 make_anomalies(x, n = 0.01, strength = 1)
 }
 \arguments{
-\item{x}{PARAM_DESCRIPTION}
+\item{x}{a tibble from \code{\link{generate_signal}}}
 
-\item{n}{PARAM_DESCRIPTION, Default: 0.01}
+\item{n}{the percentage of the data to insert anomalies into as a numeric <=
+1, Default: 0.01}
 
-\item{strength}{PARAM_DESCRIPTION, Default: 1}
+\item{strength}{the strength of the anomalies in the signal as a numeric,
+Default: 1}
 }
 \value{
-OUTPUT_DESCRIPTION
+a tibble
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+make anomaly features of varying number that randomly increase
+the signal by a specific volume
 }
 \examples{
 \dontrun{
 if(interactive()){
- #EXAMPLE1
+ generate_signal() \%>\% make_anomalies()
  }
 }
 }

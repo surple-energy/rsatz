@@ -7,23 +7,21 @@
 shift_signal(x, centre_point)
 }
 \arguments{
-\item{x}{PARAM_DESCRIPTION}
+\item{x}{a tibble from \code{\link{generate_signal}}}
 
-\item{centre_point}{PARAM_DESCRIPTION}
+\item{centre_point}{the amount to shift up by as a numeric}
 }
 \value{
-OUTPUT_DESCRIPTION
+a tibble
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+shift signal by a margin up or down to represent magnitude of
+the value
 }
 \examples{
 \dontrun{
 if(interactive()){
- #EXAMPLE1
+ generate_signal(5) \%>\% shift_signal(9)
  }
 }
 }
