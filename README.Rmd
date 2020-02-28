@@ -47,13 +47,13 @@ Or something more complicated.
 
 ```{r}
 generate_signal(7 * 4 * 12, amplitude = 5) %>% 
-  shift_signal(10) %>% 
-  make_trend(start_interval = 7 * 4 * 48, strength = 5) %>%
-  make_trend(start_interval = 7 * 4 * 48 * 2, strength = -10) %>%
+  shift_signal(centre_point = 10) %>% 
+  make_trend(start = 7 * 4 * 48, strength = 5) %>%
+  make_trend(start = 7 * 4 * 48 * 2, strength = -10) %>%
   make_weekends() %>%  
-  make_anomalies() %>% 
+  make_anomalies(n = 0.2) %>% 
   add_seasonality() %>% 
-  add_noise() %>% 
+  add_noise(low = 1, high = 5) %>% 
   ggplot(aes(date_time, signal)) +
   geom_line()
 ```
